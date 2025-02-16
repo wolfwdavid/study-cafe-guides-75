@@ -7,6 +7,38 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
 
+interface Rating {
+  ambience: number;
+  vibes: number;
+  lightStudy: number;
+  focusedStudy: number;
+  socialAtmosphere: number;
+  creativeEnvironment: number;
+  wifiPower: number;
+  coffeeQuality: number;
+  seatingComfort: number;
+  noiseLevel: number;
+  lighting: number;
+  accessibility: number;
+}
+
+interface Review {
+  ratings: Rating;
+  review: string;
+  timestamp: number;
+}
+
+interface Cafe {
+  id: number;
+  name: string;
+  rating: number;
+  address: string;
+  features: string[];
+  imageUrl: string;
+  reviews: Review[];
+  ratingCount: number;
+}
+
 const INITIAL_CAFES = [
   {
     id: 1,
@@ -15,6 +47,7 @@ const INITIAL_CAFES = [
     address: "123 College Ave, Campus District",
     features: ["Quiet Zone", "Fast Wi-Fi", "Power Outlets"],
     imageUrl: "/placeholder.svg",
+    reviews: [],
     ratingCount: 5
   },
   {
@@ -24,6 +57,7 @@ const INITIAL_CAFES = [
     address: "456 Innovation St, Tech Hub",
     features: ["Group Space", "Great Coffee", "Late Hours"],
     imageUrl: "/placeholder.svg",
+    reviews: [],
     ratingCount: 8
   },
   {
@@ -33,12 +67,13 @@ const INITIAL_CAFES = [
     address: "789 Productivity Lane, Downtown",
     features: ["Private Booths", "Premium Coffee", "Study Music"],
     imageUrl: "/placeholder.svg",
+    reviews: [],
     ratingCount: 12
   }
 ];
 
 const Index = () => {
-  const [cafes, setCafes] = useState(INITIAL_CAFES);
+  const [cafes, setCafes] = useState<Cafe[]>(INITIAL_CAFES);
   const [email, setEmail] = useState("");
 
   const handleAddCafe = (newCafe: any) => {
@@ -46,21 +81,34 @@ const Index = () => {
       ...newCafe,
       id: cafes.length + 1,
       rating: 0,
-      ratingCount: 0
+      ratingCount: 0,
+      reviews: []
     };
     setCafes([...cafes, cafeWithId]);
   };
 
-  const handleRate = (cafeId: number, newRating: number) => {
+  const handleRate = (cafeId: number, ratings: Rating, review: string) => {
     setCafes(currentCafes => 
       currentCafes.map(cafe => {
         if (cafe.id === cafeId) {
+          const newReview = {
+            ratings,
+            review,
+            timestamp: Date.now()
+          };
+          
+          // Calculate new average rating based on all categories
+          const categoryValues = Object.values(ratings);
+          const categoryAverage = categoryValues.reduce((a, b) => a + b, 0) / categoryValues.length;
+          
           const newCount = cafe.ratingCount + 1;
-          const newAverage = ((cafe.rating * cafe.ratingCount) + newRating) / newCount;
+          const newAverage = ((cafe.rating * cafe.ratingCount) + categoryAverage) / newCount;
+
           return {
             ...cafe,
             rating: Number(newAverage.toFixed(1)),
-            ratingCount: newCount
+            ratingCount: newCount,
+            reviews: [...cafe.reviews, newReview]
           };
         }
         return cafe;
@@ -87,7 +135,7 @@ const Index = () => {
             <CafeCard 
               key={cafe.id} 
               {...cafe} 
-              onRate={(rating) => handleRate(cafe.id, rating)}
+              onRate={handleRate}
             />
           ))}
         </div>
