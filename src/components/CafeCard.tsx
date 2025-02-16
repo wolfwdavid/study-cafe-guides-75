@@ -1,34 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
-import { Star, MapPin, ChevronDown, ChevronUp, Clock, Users } from 'lucide-react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/components/ui/use-toast";
-import { Checkbox } from "@/components/ui/checkbox";
-
-interface Rating {
-  ambience: number;
-  vibes: number;
-  lightStudy: number;
-  focusedStudy: number;
-  socialAtmosphere: number;
-  creativeEnvironment: number;
-  wifiPower: number;
-  coffeeQuality: number;
-  seatingComfort: number;
-  noiseLevel: number;
-  lighting: number;
-  accessibility: number;
-  bathroom: number;
-  aesthetics: number;
-}
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import { CafeHeader } from './cafe/CafeHeader';
+import { ReviewForm } from './cafe/ReviewForm';
+import { Rating, Review } from '@/types/cafe';
 
 interface CafeCardProps {
   id: number;
@@ -41,38 +20,19 @@ interface CafeCardProps {
     [key: string]: string;
   };
   petFriendly: boolean;
-  onRate: (cafeId: number, ratings: Rating, review: string, tips: string) => void;
+  onRate: (cafeId: number, ratings: Rating, review: string, tips: string, tags: string[]) => void;
 }
 
-const ratingCategories = [
-  { key: 'ambience', label: 'Ambience', description: 'How comfortable and conducive the environment is' },
-  { key: 'vibes', label: 'Vibes', description: 'Overall mood or energy of the space' },
-  { key: 'lightStudy', label: 'Light Study', description: 'Suitability for casual study sessions' },
-  { key: 'focusedStudy', label: 'Focused Study', description: 'Quietness and ability to concentrate' },
-  { key: 'socialAtmosphere', label: 'Social Atmosphere', description: 'Good for socializing or group work' },
-  { key: 'creativeEnvironment', label: 'Creative Environment', description: 'Sparks creativity and brainstorming' },
-  { key: 'wifiPower', label: 'Wi-Fi and Power', description: 'Remote work/study convenience' },
-  { key: 'coffeeQuality', label: 'Coffee Quality', description: 'Quality of drinks' },
-  { key: 'seatingComfort', label: 'Seating Comfort', description: 'Comfort of seats and table availability' },
-  { key: 'noiseLevel', label: 'Noise Level', description: 'From very quiet to very loud' },
-  { key: 'lighting', label: 'Lighting', description: 'Brightness for long study hours' },
-  { key: 'accessibility', label: 'Accessibility', description: 'Ease of access and navigation' },
-  { key: 'bathroom', label: 'Bathroom', description: 'Cleanliness and availability of restrooms' },
-  { key: 'aesthetics', label: 'Aesthetics', description: 'Visual appeal and Instagram-worthiness' },
-];
-
-const purposeTags = [
-  { id: 'group-meetups', label: 'Group Meetups' },
-  { id: 'solo-study', label: 'Solo Study' },
-  { id: 'date-spot', label: 'Date Spot' },
-  { id: 'quick-coffee', label: 'Quick Coffee' },
-  { id: 'long-sessions', label: 'Long Study Sessions' },
-  { id: 'meetings', label: 'Professional Meetings' },
-  { id: 'creative-work', label: 'Creative Work' },
-  { id: 'networking', label: 'Networking' },
-];
-
-const CafeCard = ({ id, name, rating, address, features, hours, petFriendly, onRate }: CafeCardProps) => {
+const CafeCard = ({ 
+  id, 
+  name, 
+  rating, 
+  address, 
+  features, 
+  hours, 
+  petFriendly,
+  onRate 
+}: CafeCardProps) => {
   const [isRatingExpanded, setIsRatingExpanded] = useState(false);
   const [isHoursExpanded, setIsHoursExpanded] = useState(false);
   const [review, setReview] = useState("");
@@ -81,6 +41,7 @@ const CafeCard = ({ id, name, rating, address, features, hours, petFriendly, onR
   const [canRate, setCanRate] = useState(true);
   const { toast } = useToast();
   const [ratings, setRatings] = useState<Rating>({
+    aesthetics: 5,
     ambience: 5,
     vibes: 5,
     lightStudy: 5,
@@ -93,8 +54,7 @@ const CafeCard = ({ id, name, rating, address, features, hours, petFriendly, onR
     noiseLevel: 5,
     lighting: 5,
     accessibility: 5,
-    bathroom: 5,
-    aesthetics: 5
+    bathroom: 5
   });
 
   useEffect(() => {
@@ -150,7 +110,7 @@ const CafeCard = ({ id, name, rating, address, features, hours, petFriendly, onR
       return;
     }
 
-    onRate(id, ratings, review, tips);
+    onRate(id, ratings, review, tips, selectedTags);
     localStorage.setItem(`cafe-${id}-last-rating`, Date.now().toString());
     setCanRate(false);
     setIsRatingExpanded(false);
@@ -158,6 +118,7 @@ const CafeCard = ({ id, name, rating, address, features, hours, petFriendly, onR
     setTips("");
     setSelectedTags([]);
     setRatings({
+      aesthetics: 5,
       ambience: 5,
       vibes: 5,
       lightStudy: 5,
@@ -170,8 +131,7 @@ const CafeCard = ({ id, name, rating, address, features, hours, petFriendly, onR
       noiseLevel: 5,
       lighting: 5,
       accessibility: 5,
-      bathroom: 5,
-      aesthetics: 5
+      bathroom: 5
     });
 
     toast({
@@ -182,53 +142,15 @@ const CafeCard = ({ id, name, rating, address, features, hours, petFriendly, onR
 
   return (
     <Card className="transition-all duration-300 hover:shadow-lg animate-fadeIn">
-      <CardHeader className="pt-4">
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-xl font-semibold text-cafe-900">{name}</CardTitle>
-            <CardDescription className="flex items-center text-cafe-500">
-              <MapPin className="w-4 h-4 mr-1" />
-              {address}
-            </CardDescription>
-          </div>
-          <Badge variant="secondary" className="bg-cafe-100 text-cafe-900">
-            <Star className="w-4 h-4 mr-1 text-cafe-accent" />
-            {rating.toFixed(1)}
-          </Badge>
-        </div>
-        
-        <div className="mt-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full flex items-center justify-between"
-            onClick={() => setIsHoursExpanded(!isHoursExpanded)}
-          >
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-cafe-500" />
-              <span className="text-sm font-medium">Hours</span>
-            </div>
-            {isHoursExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </Button>
-          
-          {isHoursExpanded && (
-            <div className="mt-2 grid grid-cols-2 gap-2 text-sm animate-in fade-in slide-in-from-top-1">
-              {Object.entries(hours).map(([day, time]) => (
-                <div key={day} className="flex justify-between">
-                  <span className="font-medium">{day}</span>
-                  <span>{time}</span>
-                </div>
-              ))}
-            </div>
-          )}
-          
-          {petFriendly && (
-            <Badge variant="outline" className="mt-2 bg-green-50 text-green-700 border-green-200">
-              Pet Friendly
-            </Badge>
-          )}
-        </div>
-      </CardHeader>
+      <CafeHeader
+        name={name}
+        address={address}
+        rating={rating}
+        hours={hours}
+        petFriendly={petFriendly}
+        isHoursExpanded={isHoursExpanded}
+        onToggleHours={() => setIsHoursExpanded(!isHoursExpanded)}
+      />
 
       <CardContent>
         <div className="flex flex-wrap gap-2 mb-4">
@@ -273,94 +195,17 @@ const CafeCard = ({ id, name, rating, address, features, hours, petFriendly, onR
         </Button>
 
         {isRatingExpanded && canRate && (
-          <div className="mt-4 space-y-4">
-            {ratingCategories.map(({ key, label, description }) => (
-              <div key={key} className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <label className="text-sm font-medium text-cafe-900">
-                    {label}
-                    <span className="text-xs text-cafe-500 block">
-                      {description}
-                    </span>
-                  </label>
-                  <span className="text-sm text-cafe-600">
-                    {ratings[key as keyof Rating]}/10
-                  </span>
-                </div>
-                <Slider
-                  value={[ratings[key as keyof Rating]]}
-                  min={1}
-                  max={10}
-                  step={1}
-                  onValueChange={(value) => handleRatingChange(key as keyof Rating, value)}
-                  className="w-full"
-                />
-              </div>
-            ))}
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-cafe-900">
-                What is this cafe good for?
-                <span className="text-xs text-cafe-500 block">
-                  Select all that apply
-                </span>
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                {purposeTags.map((tag) => (
-                  <div key={tag.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`tag-${tag.id}`}
-                      checked={selectedTags.includes(tag.id)}
-                      onCheckedChange={() => handleTagToggle(tag.id)}
-                    />
-                    <label
-                      htmlFor={`tag-${tag.id}`}
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      {tag.label}
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-cafe-900">
-                Your Review
-                <span className="text-xs text-cafe-500 block">
-                  Share your thoughts and tips with others
-                </span>
-              </label>
-              <textarea
-                value={review}
-                onChange={(e) => setReview(e.target.value)}
-                className="min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
-                placeholder="Write your review here..."
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-cafe-900">
-                Tips & Best Times
-                <span className="text-xs text-cafe-500 block">
-                  Share tips about best times to visit, seating availability, or any other helpful information
-                </span>
-              </label>
-              <textarea
-                value={tips}
-                onChange={(e) => setTips(e.target.value)}
-                className="min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
-                placeholder="E.g., Best times to find seating, quiet hours, etc..."
-              />
-            </div>
-
-            <Button
-              className="w-full bg-cafe-accent hover:bg-cafe-accent/90 text-white"
-              onClick={handleSubmitRating}
-            >
-              Submit Rating
-            </Button>
-          </div>
+          <ReviewForm
+            ratings={ratings}
+            onRatingChange={handleRatingChange}
+            selectedTags={selectedTags}
+            onTagToggle={handleTagToggle}
+            review={review}
+            onReviewChange={setReview}
+            tips={tips}
+            onTipsChange={setTips}
+            onSubmit={handleSubmitRating}
+          />
         )}
       </CardContent>
     </Card>
