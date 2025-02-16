@@ -2,6 +2,7 @@
 import { Checkbox } from "@/components/ui/checkbox";
 
 export const purposeTags = [
+  { id: 'pet-friendly', label: 'Pet Friendly' },
   { id: 'group-meetups', label: 'Group Meetups' },
   { id: 'solo-study', label: 'Solo Study' },
   { id: 'date-spot', label: 'Date Spot' },
