@@ -9,25 +9,31 @@ import { Send } from "lucide-react";
 
 const INITIAL_CAFES = [
   {
+    id: 1,
     name: "The Study Brew",
     rating: 4.8,
     address: "123 College Ave, Campus District",
     features: ["Quiet Zone", "Fast Wi-Fi", "Power Outlets"],
     imageUrl: "/placeholder.svg",
+    ratingCount: 5
   },
   {
+    id: 2,
     name: "Creative Corner Café",
     rating: 4.6,
     address: "456 Innovation St, Tech Hub",
     features: ["Group Space", "Great Coffee", "Late Hours"],
     imageUrl: "/placeholder.svg",
+    ratingCount: 8
   },
   {
+    id: 3,
     name: "Focus & Grind",
     rating: 4.9,
     address: "789 Productivity Lane, Downtown",
     features: ["Private Booths", "Premium Coffee", "Study Music"],
     imageUrl: "/placeholder.svg",
+    ratingCount: 12
   }
 ];
 
@@ -36,12 +42,34 @@ const Index = () => {
   const [email, setEmail] = useState("");
 
   const handleAddCafe = (newCafe: any) => {
-    setCafes([...cafes, newCafe]);
+    const cafeWithId = {
+      ...newCafe,
+      id: cafes.length + 1,
+      rating: 0,
+      ratingCount: 0
+    };
+    setCafes([...cafes, cafeWithId]);
+  };
+
+  const handleRate = (cafeId: number, newRating: number) => {
+    setCafes(currentCafes => 
+      currentCafes.map(cafe => {
+        if (cafe.id === cafeId) {
+          const newCount = cafe.ratingCount + 1;
+          const newAverage = ((cafe.rating * cafe.ratingCount) + newRating) / newCount;
+          return {
+            ...cafe,
+            rating: Number(newAverage.toFixed(1)),
+            ratingCount: newCount
+          };
+        }
+        return cafe;
+      })
+    );
   };
 
   const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically handle the email submission
     console.log("Email submitted:", email);
     setEmail("");
   };
@@ -55,8 +83,12 @@ const Index = () => {
           <AddCafeDialog onAddCafe={handleAddCafe} />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {cafes.map((cafe, index) => (
-            <CafeCard key={index} {...cafe} />
+          {cafes.map((cafe) => (
+            <CafeCard 
+              key={cafe.id} 
+              {...cafe} 
+              onRate={(rating) => handleRate(cafe.id, rating)}
+            />
           ))}
         </div>
       </div>
