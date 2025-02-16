@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Star, MapPin, ChevronDown, ChevronUp, Clock } from 'lucide-react';
+import { Star, MapPin, ChevronDown, ChevronUp, Clock, Users } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/components/ui/use-toast";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Rating {
   ambience: number;
@@ -26,6 +27,7 @@ interface Rating {
   lighting: number;
   accessibility: number;
   bathroom: number;
+  aesthetics: number;
 }
 
 interface CafeCardProps {
@@ -55,7 +57,19 @@ const ratingCategories = [
   { key: 'noiseLevel', label: 'Noise Level', description: 'From very quiet to very loud' },
   { key: 'lighting', label: 'Lighting', description: 'Brightness for long study hours' },
   { key: 'accessibility', label: 'Accessibility', description: 'Ease of access and navigation' },
-  { key: 'bathroom', label: 'Bathroom', description: 'Cleanliness and availability of restrooms' }
+  { key: 'bathroom', label: 'Bathroom', description: 'Cleanliness and availability of restrooms' },
+  { key: 'aesthetics', label: 'Aesthetics', description: 'Visual appeal and Instagram-worthiness' },
+];
+
+const purposeTags = [
+  { id: 'group-meetups', label: 'Group Meetups' },
+  { id: 'solo-study', label: 'Solo Study' },
+  { id: 'date-spot', label: 'Date Spot' },
+  { id: 'quick-coffee', label: 'Quick Coffee' },
+  { id: 'long-sessions', label: 'Long Study Sessions' },
+  { id: 'meetings', label: 'Professional Meetings' },
+  { id: 'creative-work', label: 'Creative Work' },
+  { id: 'networking', label: 'Networking' },
 ];
 
 const CafeCard = ({ id, name, rating, address, features, hours, petFriendly, onRate }: CafeCardProps) => {
@@ -63,6 +77,7 @@ const CafeCard = ({ id, name, rating, address, features, hours, petFriendly, onR
   const [isHoursExpanded, setIsHoursExpanded] = useState(false);
   const [review, setReview] = useState("");
   const [tips, setTips] = useState("");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [canRate, setCanRate] = useState(true);
   const { toast } = useToast();
   const [ratings, setRatings] = useState<Rating>({
@@ -78,7 +93,8 @@ const CafeCard = ({ id, name, rating, address, features, hours, petFriendly, onR
     noiseLevel: 5,
     lighting: 5,
     accessibility: 5,
-    bathroom: 5
+    bathroom: 5,
+    aesthetics: 5
   });
 
   useEffect(() => {
@@ -115,6 +131,15 @@ const CafeCard = ({ id, name, rating, address, features, hours, petFriendly, onR
     }));
   };
 
+  const handleTagToggle = (tagId: string) => {
+    setSelectedTags(current => {
+      if (current.includes(tagId)) {
+        return current.filter(id => id !== tagId);
+      }
+      return [...current, tagId];
+    });
+  };
+
   const handleSubmitRating = () => {
     if (!canRate) {
       toast({
@@ -131,6 +156,7 @@ const CafeCard = ({ id, name, rating, address, features, hours, petFriendly, onR
     setIsRatingExpanded(false);
     setReview("");
     setTips("");
+    setSelectedTags([]);
     setRatings({
       ambience: 5,
       vibes: 5,
@@ -144,7 +170,8 @@ const CafeCard = ({ id, name, rating, address, features, hours, petFriendly, onR
       noiseLevel: 5,
       lighting: 5,
       accessibility: 5,
-      bathroom: 5
+      bathroom: 5,
+      aesthetics: 5
     });
 
     toast({
@@ -270,6 +297,32 @@ const CafeCard = ({ id, name, rating, address, features, hours, petFriendly, onR
                 />
               </div>
             ))}
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-cafe-900">
+                What is this cafe good for?
+                <span className="text-xs text-cafe-500 block">
+                  Select all that apply
+                </span>
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {purposeTags.map((tag) => (
+                  <div key={tag.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`tag-${tag.id}`}
+                      checked={selectedTags.includes(tag.id)}
+                      onCheckedChange={() => handleTagToggle(tag.id)}
+                    />
+                    <label
+                      htmlFor={`tag-${tag.id}`}
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      {tag.label}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-cafe-900">

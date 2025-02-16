@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import Hero from "@/components/Hero";
 import CafeCard from "@/components/CafeCard";
@@ -8,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
 
 interface Rating {
+  aesthetics: number;
   ambience: number;
   vibes: number;
   lightStudy: number;
@@ -28,6 +28,7 @@ interface Review {
   review: string;
   tips: string;
   timestamp: number;
+  tags: string[];
 }
 
 interface Cafe {
@@ -134,7 +135,7 @@ const Index = () => {
     setCafes([...cafes, cafeWithId]);
   };
 
-  const handleRate = (cafeId: number, ratings: Rating, review: string, tips: string) => {
+  const handleRate = (cafeId: number, ratings: Rating, review: string, tips: string, tags: string[]) => {
     setCafes(currentCafes => 
       currentCafes.map(cafe => {
         if (cafe.id === cafeId) {
@@ -142,7 +143,8 @@ const Index = () => {
             ratings,
             review,
             tips,
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            tags
           };
           
           // Calculate new average rating based on all categories
