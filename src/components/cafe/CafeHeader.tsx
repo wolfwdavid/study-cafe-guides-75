@@ -18,6 +18,7 @@ interface CafeHeaderProps {
   petFriendly: boolean;
   isHoursExpanded: boolean;
   onToggleHours: () => void;
+  ratingCount?: number;
 }
 
 export const CafeHeader = ({
@@ -27,6 +28,7 @@ export const CafeHeader = ({
   hours,
   isHoursExpanded,
   onToggleHours,
+  ratingCount = 0,
 }: CafeHeaderProps) => {
   return (
     <CardHeader className="pt-4">
@@ -38,10 +40,16 @@ export const CafeHeader = ({
             {address}
           </CardDescription>
         </div>
-        <Badge variant="secondary" className="bg-cafe-100 text-cafe-900">
-          <Star className="w-4 h-4 mr-1 text-cafe-accent" />
-          {rating.toFixed(1)}
-        </Badge>
+        {ratingCount === 0 ? (
+          <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+            Needs Review
+          </Badge>
+        ) : (
+          <Badge variant="secondary" className="bg-cafe-100 text-cafe-900">
+            <Star className="w-4 h-4 mr-1 text-cafe-accent" />
+            {rating.toFixed(1)}
+          </Badge>
+        )}
       </div>
       
       <div className="mt-4">

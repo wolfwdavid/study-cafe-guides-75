@@ -20,6 +20,7 @@ interface CafeCardProps {
     [key: string]: string;
   };
   petFriendly: boolean;
+  ratingCount: number;
   onRate: (cafeId: number, ratings: Rating, review: string, tips: string, tags: string[]) => void;
 }
 
@@ -31,6 +32,7 @@ const CafeCard = ({
   features, 
   hours, 
   petFriendly,
+  ratingCount,
   onRate 
 }: CafeCardProps) => {
   const [isRatingExpanded, setIsRatingExpanded] = useState(false);
@@ -150,6 +152,7 @@ const CafeCard = ({
         petFriendly={petFriendly}
         isHoursExpanded={isHoursExpanded}
         onToggleHours={() => setIsHoursExpanded(!isHoursExpanded)}
+        ratingCount={ratingCount}
       />
 
       <CardContent>
