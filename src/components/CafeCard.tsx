@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Star, MapPin, ChevronDown, ChevronUp, Clock } from 'lucide-react';
 import {
@@ -61,6 +60,7 @@ const ratingCategories = [
 
 const CafeCard = ({ id, name, rating, address, features, hours, petFriendly, onRate }: CafeCardProps) => {
   const [isRatingExpanded, setIsRatingExpanded] = useState(false);
+  const [isHoursExpanded, setIsHoursExpanded] = useState(false);
   const [review, setReview] = useState("");
   const [tips, setTips] = useState("");
   const [canRate, setCanRate] = useState(true);
@@ -170,21 +170,33 @@ const CafeCard = ({ id, name, rating, address, features, hours, petFriendly, onR
           </Badge>
         </div>
         
-        <div className="mt-4 space-y-2">
-          <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-cafe-500" />
-            <span className="text-sm font-medium">Hours</span>
-          </div>
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            {Object.entries(hours).map(([day, time]) => (
-              <div key={day} className="flex justify-between">
-                <span className="font-medium">{day}</span>
-                <span>{time}</span>
-              </div>
-            ))}
-          </div>
+        <div className="mt-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full flex items-center justify-between"
+            onClick={() => setIsHoursExpanded(!isHoursExpanded)}
+          >
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-cafe-500" />
+              <span className="text-sm font-medium">Hours</span>
+            </div>
+            {isHoursExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </Button>
+          
+          {isHoursExpanded && (
+            <div className="mt-2 grid grid-cols-2 gap-2 text-sm animate-in fade-in slide-in-from-top-1">
+              {Object.entries(hours).map(([day, time]) => (
+                <div key={day} className="flex justify-between">
+                  <span className="font-medium">{day}</span>
+                  <span>{time}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          
           {petFriendly && (
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+            <Badge variant="outline" className="mt-2 bg-green-50 text-green-700 border-green-200">
               Pet Friendly
             </Badge>
           )}

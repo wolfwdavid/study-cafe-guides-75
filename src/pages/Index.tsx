@@ -111,6 +111,7 @@ const INITIAL_CAFES = [
 const Index = () => {
   const [cafes, setCafes] = useState<Cafe[]>(INITIAL_CAFES);
   const [email, setEmail] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleAddCafe = (newCafe: any) => {
     const cafeWithId = {
@@ -169,16 +170,47 @@ const Index = () => {
     setEmail("");
   };
 
+  const filteredCafes = cafes.filter(cafe => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      cafe.name.toLowerCase().includes(searchLower) ||
+      cafe.address.toLowerCase().includes(searchLower) ||
+      cafe.features.some(feature => feature.toLowerCase().includes(searchLower)) ||
+      (cafe.petFriendly && "pet friendly".includes(searchLower)) ||
+      Object.entries(cafe.hours).some(([day, time]) => 
+        day.toLowerCase().includes(searchLower) || 
+        time.toLowerCase().includes(searchLower)
+      ) ||
+      cafe.reviews.some(review => 
+        review.review.toLowerCase().includes(searchLower) ||
+        review.tips.toLowerCase().includes(searchLower)
+      )
+    );
+  });
+
   return (
     <div className="min-h-screen bg-cafe-100">
       <Hero />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-bold text-cafe-900">Featured Study Spots</h2>
-          <AddCafeDialog onAddCafe={handleAddCafe} />
+        <div className="flex flex-col gap-6 mb-8">
+          <div className="flex justify-between items-center">
+            <h2 className="text-3xl font-bold text-cafe-900">Featured Study Spots</h2>
+            <AddCafeDialog onAddCafe={handleAddCafe} />
+          </div>
+          
+          <div className="relative">
+            <Input
+              type="text"
+              placeholder="Search by name, features, hours, reviews, pet-friendly status..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-4 pr-10 py-2"
+            />
+          </div>
         </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {cafes.map((cafe) => (
+          {filteredCafes.map((cafe) => (
             <CafeCard 
               key={cafe.id} 
               {...cafe} 
