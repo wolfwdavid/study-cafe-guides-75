@@ -1,5 +1,5 @@
 
-import { MapPin, Star, Clock, ChevronUp, ChevronDown } from 'lucide-react';
+import { MapPin, Star, Clock, ChevronUp, ChevronDown, PawPrint, Check } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -71,8 +71,10 @@ export const CafeHeader = ({
         )}
         
         {petFriendly && (
-          <Badge variant="outline" className="mt-2 bg-green-50 text-green-700 border-green-200">
+          <Badge variant="outline" className="mt-2 bg-green-50 text-green-700 border-green-200 flex items-center gap-1">
+            <PawPrint className="w-4 h-4" />
             Pet Friendly
+            <Check className="w-3 h-3" />
           </Badge>
         )}
       </div>
