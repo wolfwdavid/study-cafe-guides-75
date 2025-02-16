@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { Star, MapPin, ChevronDown, ChevronUp } from 'lucide-react';
+import { Star, MapPin, ChevronDown, ChevronUp, Clock } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -25,6 +26,7 @@ interface Rating {
   noiseLevel: number;
   lighting: number;
   accessibility: number;
+  bathroom: number;
 }
 
 interface CafeCardProps {
@@ -34,7 +36,11 @@ interface CafeCardProps {
   address: string;
   features: string[];
   imageUrl: string;
-  onRate: (cafeId: number, ratings: Rating, review: string) => void;
+  hours: {
+    [key: string]: string;
+  };
+  petFriendly: boolean;
+  onRate: (cafeId: number, ratings: Rating, review: string, tips: string) => void;
 }
 
 const ratingCategories = [
@@ -49,12 +55,14 @@ const ratingCategories = [
   { key: 'seatingComfort', label: 'Seating Comfort', description: 'Comfort of seats and table availability' },
   { key: 'noiseLevel', label: 'Noise Level', description: 'From very quiet to very loud' },
   { key: 'lighting', label: 'Lighting', description: 'Brightness for long study hours' },
-  { key: 'accessibility', label: 'Accessibility', description: 'Ease of access and navigation' }
+  { key: 'accessibility', label: 'Accessibility', description: 'Ease of access and navigation' },
+  { key: 'bathroom', label: 'Bathroom', description: 'Cleanliness and availability of restrooms' }
 ];
 
-const CafeCard = ({ id, name, rating, address, features, onRate }: CafeCardProps) => {
+const CafeCard = ({ id, name, rating, address, features, hours, petFriendly, onRate }: CafeCardProps) => {
   const [isRatingExpanded, setIsRatingExpanded] = useState(false);
   const [review, setReview] = useState("");
+  const [tips, setTips] = useState("");
   const [canRate, setCanRate] = useState(true);
   const { toast } = useToast();
   const [ratings, setRatings] = useState<Rating>({
@@ -69,7 +77,8 @@ const CafeCard = ({ id, name, rating, address, features, onRate }: CafeCardProps
     seatingComfort: 5,
     noiseLevel: 5,
     lighting: 5,
-    accessibility: 5
+    accessibility: 5,
+    bathroom: 5
   });
 
   useEffect(() => {
@@ -116,11 +125,12 @@ const CafeCard = ({ id, name, rating, address, features, onRate }: CafeCardProps
       return;
     }
 
-    onRate(id, ratings, review);
+    onRate(id, ratings, review, tips);
     localStorage.setItem(`cafe-${id}-last-rating`, Date.now().toString());
     setCanRate(false);
     setIsRatingExpanded(false);
     setReview("");
+    setTips("");
     setRatings({
       ambience: 5,
       vibes: 5,
@@ -133,7 +143,8 @@ const CafeCard = ({ id, name, rating, address, features, onRate }: CafeCardProps
       seatingComfort: 5,
       noiseLevel: 5,
       lighting: 5,
-      accessibility: 5
+      accessibility: 5,
+      bathroom: 5
     });
 
     toast({
@@ -146,19 +157,40 @@ const CafeCard = ({ id, name, rating, address, features, onRate }: CafeCardProps
     <Card className="transition-all duration-300 hover:shadow-lg animate-fadeIn">
       <CardHeader className="pt-4">
         <div className="flex justify-between items-start">
-          <CardTitle className="text-xl font-semibold text-cafe-900">{name}</CardTitle>
-          <div className="flex items-center gap-1">
-            <Badge variant="secondary" className="bg-cafe-100 text-cafe-900">
-              <Star className="w-4 h-4 mr-1 text-cafe-accent" />
-              {rating.toFixed(1)}
-            </Badge>
+          <div>
+            <CardTitle className="text-xl font-semibold text-cafe-900">{name}</CardTitle>
+            <CardDescription className="flex items-center text-cafe-500">
+              <MapPin className="w-4 h-4 mr-1" />
+              {address}
+            </CardDescription>
           </div>
+          <Badge variant="secondary" className="bg-cafe-100 text-cafe-900">
+            <Star className="w-4 h-4 mr-1 text-cafe-accent" />
+            {rating.toFixed(1)}
+          </Badge>
         </div>
-        <CardDescription className="flex items-center text-cafe-500">
-          <MapPin className="w-4 h-4 mr-1" />
-          {address}
-        </CardDescription>
+        
+        <div className="mt-4 space-y-2">
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-cafe-500" />
+            <span className="text-sm font-medium">Hours</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            {Object.entries(hours).map(([day, time]) => (
+              <div key={day} className="flex justify-between">
+                <span className="font-medium">{day}</span>
+                <span>{time}</span>
+              </div>
+            ))}
+          </div>
+          {petFriendly && (
+            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+              Pet Friendly
+            </Badge>
+          )}
+        </div>
       </CardHeader>
+
       <CardContent>
         <div className="flex flex-wrap gap-2 mb-4">
           {features.map((feature, index) => (
@@ -239,6 +271,21 @@ const CafeCard = ({ id, name, rating, address, features, onRate }: CafeCardProps
                 onChange={(e) => setReview(e.target.value)}
                 className="min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
                 placeholder="Write your review here..."
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-cafe-900">
+                Tips & Best Times
+                <span className="text-xs text-cafe-500 block">
+                  Share tips about best times to visit, seating availability, or any other helpful information
+                </span>
+              </label>
+              <textarea
+                value={tips}
+                onChange={(e) => setTips(e.target.value)}
+                className="min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+                placeholder="E.g., Best times to find seating, quiet hours, etc..."
               />
             </div>
 

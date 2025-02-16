@@ -20,11 +20,13 @@ interface Rating {
   noiseLevel: number;
   lighting: number;
   accessibility: number;
+  bathroom: number;
 }
 
 interface Review {
   ratings: Rating;
   review: string;
+  tips: string;
   timestamp: number;
 }
 
@@ -35,6 +37,10 @@ interface Cafe {
   address: string;
   features: string[];
   imageUrl: string;
+  hours: {
+    [key: string]: string;
+  };
+  petFriendly: boolean;
   reviews: Review[];
   ratingCount: number;
 }
@@ -47,6 +53,16 @@ const INITIAL_CAFES = [
     address: "123 College Ave, Campus District",
     features: ["Quiet Zone", "Fast Wi-Fi", "Power Outlets"],
     imageUrl: "/placeholder.svg",
+    hours: {
+      Monday: "7:00 AM - 10:00 PM",
+      Tuesday: "7:00 AM - 10:00 PM",
+      Wednesday: "7:00 AM - 10:00 PM",
+      Thursday: "7:00 AM - 10:00 PM",
+      Friday: "7:00 AM - 11:00 PM",
+      Saturday: "8:00 AM - 11:00 PM",
+      Sunday: "8:00 AM - 9:00 PM"
+    },
+    petFriendly: false,
     reviews: [],
     ratingCount: 5
   },
@@ -57,6 +73,16 @@ const INITIAL_CAFES = [
     address: "456 Innovation St, Tech Hub",
     features: ["Group Space", "Great Coffee", "Late Hours"],
     imageUrl: "/placeholder.svg",
+    hours: {
+      Monday: "6:00 AM - 11:00 PM",
+      Tuesday: "6:00 AM - 11:00 PM",
+      Wednesday: "6:00 AM - 11:00 PM",
+      Thursday: "6:00 AM - 11:00 PM",
+      Friday: "6:00 AM - 12:00 AM",
+      Saturday: "7:00 AM - 12:00 AM",
+      Sunday: "7:00 AM - 10:00 PM"
+    },
+    petFriendly: true,
     reviews: [],
     ratingCount: 8
   },
@@ -67,6 +93,16 @@ const INITIAL_CAFES = [
     address: "789 Productivity Lane, Downtown",
     features: ["Private Booths", "Premium Coffee", "Study Music"],
     imageUrl: "/placeholder.svg",
+    hours: {
+      Monday: "8:00 AM - 9:00 PM",
+      Tuesday: "8:00 AM - 9:00 PM",
+      Wednesday: "8:00 AM - 9:00 PM",
+      Thursday: "8:00 AM - 9:00 PM",
+      Friday: "8:00 AM - 10:00 PM",
+      Saturday: "9:00 AM - 10:00 PM",
+      Sunday: "9:00 AM - 8:00 PM"
+    },
+    petFriendly: false,
     reviews: [],
     ratingCount: 12
   }
@@ -82,18 +118,29 @@ const Index = () => {
       id: cafes.length + 1,
       rating: 0,
       ratingCount: 0,
-      reviews: []
+      reviews: [],
+      hours: {
+        Monday: "9:00 AM - 5:00 PM",
+        Tuesday: "9:00 AM - 5:00 PM",
+        Wednesday: "9:00 AM - 5:00 PM",
+        Thursday: "9:00 AM - 5:00 PM",
+        Friday: "9:00 AM - 5:00 PM",
+        Saturday: "10:00 AM - 4:00 PM",
+        Sunday: "Closed"
+      },
+      petFriendly: false
     };
     setCafes([...cafes, cafeWithId]);
   };
 
-  const handleRate = (cafeId: number, ratings: Rating, review: string) => {
+  const handleRate = (cafeId: number, ratings: Rating, review: string, tips: string) => {
     setCafes(currentCafes => 
       currentCafes.map(cafe => {
         if (cafe.id === cafeId) {
           const newReview = {
             ratings,
             review,
+            tips,
             timestamp: Date.now()
           };
           
