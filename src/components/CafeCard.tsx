@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Star, MapPin, ChevronDown, ChevronUp } from 'lucide-react';
 import {
   Card,
@@ -10,7 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Rating {
   ambience: number;
@@ -55,6 +55,8 @@ const ratingCategories = [
 const CafeCard = ({ id, name, rating, address, features, onRate }: CafeCardProps) => {
   const [isRatingExpanded, setIsRatingExpanded] = useState(false);
   const [review, setReview] = useState("");
+  const [canRate, setCanRate] = useState(true);
+  const { toast } = useToast();
   const [ratings, setRatings] = useState<Rating>({
     ambience: 5,
     vibes: 5,
@@ -70,6 +72,33 @@ const CafeCard = ({ id, name, rating, address, features, onRate }: CafeCardProps
     accessibility: 5
   });
 
+  useEffect(() => {
+    const checkRatingEligibility = () => {
+      const lastRating = localStorage.getItem(`cafe-${id}-last-rating`);
+      if (lastRating) {
+        const lastRatingDate = new Date(parseInt(lastRating));
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        
+        if (lastRatingDate > oneWeekAgo) {
+          setCanRate(false);
+          const nextEligibleDate = new Date(lastRatingDate);
+          nextEligibleDate.setDate(nextEligibleDate.getDate() + 7);
+          return nextEligibleDate;
+        }
+      }
+      return null;
+    };
+
+    const nextEligibleDate = checkRatingEligibility();
+    if (nextEligibleDate) {
+      toast({
+        title: "Rating limit reached",
+        description: `You can rate this cafe again on ${nextEligibleDate.toLocaleDateString()}`,
+      });
+    }
+  }, [id, toast]);
+
   const handleRatingChange = (category: keyof Rating, value: number[]) => {
     setRatings(prev => ({
       ...prev,
@@ -78,7 +107,18 @@ const CafeCard = ({ id, name, rating, address, features, onRate }: CafeCardProps
   };
 
   const handleSubmitRating = () => {
+    if (!canRate) {
+      toast({
+        title: "Unable to rate",
+        description: "You can only rate each cafe once per week",
+        variant: "destructive",
+      });
+      return;
+    }
+
     onRate(id, ratings, review);
+    localStorage.setItem(`cafe-${id}-last-rating`, Date.now().toString());
+    setCanRate(false);
     setIsRatingExpanded(false);
     setReview("");
     setRatings({
@@ -94,6 +134,11 @@ const CafeCard = ({ id, name, rating, address, features, onRate }: CafeCardProps
       noiseLevel: 5,
       lighting: 5,
       accessibility: 5
+    });
+
+    toast({
+      title: "Rating submitted",
+      description: "Thank you for your feedback! You can rate this cafe again in one week.",
     });
   };
 
@@ -130,7 +175,18 @@ const CafeCard = ({ id, name, rating, address, features, onRate }: CafeCardProps
         <Button
           variant="outline"
           className="w-full mt-4"
-          onClick={() => setIsRatingExpanded(!isRatingExpanded)}
+          onClick={() => {
+            if (!canRate) {
+              toast({
+                title: "Rating limit reached",
+                description: "You can only rate each cafe once per week",
+                variant: "destructive",
+              });
+              return;
+            }
+            setIsRatingExpanded(!isRatingExpanded);
+          }}
+          disabled={!canRate}
         >
           {isRatingExpanded ? (
             <>
@@ -145,7 +201,7 @@ const CafeCard = ({ id, name, rating, address, features, onRate }: CafeCardProps
           )}
         </Button>
 
-        {isRatingExpanded && (
+        {isRatingExpanded && canRate && (
           <div className="mt-4 space-y-4">
             {ratingCategories.map(({ key, label, description }) => (
               <div key={key} className="space-y-2">
