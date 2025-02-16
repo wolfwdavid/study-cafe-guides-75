@@ -3,6 +3,9 @@ import { useState } from "react";
 import Hero from "@/components/Hero";
 import CafeCard from "@/components/CafeCard";
 import AddCafeDialog from "@/components/AddCafeDialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Send } from "lucide-react";
 
 const INITIAL_CAFES = [
   {
@@ -30,9 +33,17 @@ const INITIAL_CAFES = [
 
 const Index = () => {
   const [cafes, setCafes] = useState(INITIAL_CAFES);
+  const [email, setEmail] = useState("");
 
   const handleAddCafe = (newCafe: any) => {
     setCafes([...cafes, newCafe]);
+  };
+
+  const handleEmailSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Here you would typically handle the email submission
+    console.log("Email submitted:", email);
+    setEmail("");
   };
 
   return (
@@ -47,6 +58,33 @@ const Index = () => {
           {cafes.map((cafe, index) => (
             <CafeCard key={index} {...cafe} />
           ))}
+        </div>
+      </div>
+
+      {/* Email Signup Section */}
+      <div className="bg-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-4xl font-bold text-cafe-accent mb-2">The StudyBrew</h2>
+            <p className="text-cafe-600 mb-8 max-w-2xl mx-auto">
+              Join our community of study spot enthusiasts. Get weekly updates on new cafes, 
+              study tips, and exclusive reviews.
+            </p>
+            <form onSubmit={handleEmailSubmit} className="max-w-md mx-auto flex gap-4">
+              <Input
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="flex-1"
+              />
+              <Button type="submit" className="bg-cafe-accent hover:bg-cafe-accent/90 text-white">
+                <Send className="w-4 h-4 mr-2" />
+                Subscribe
+              </Button>
+            </form>
+          </div>
         </div>
       </div>
     </div>
